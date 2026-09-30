@@ -10,8 +10,8 @@ than feature count. Prefer framework features (Policies, Form Requests, API Reso
 scopes, factories) over custom abstractions. The full functional spec is `LARADESK_PLAN.md` (in French);
 this file records the decisions taken where the plan was ambiguous or superseded.
 
-> Status: scaffolded (Laravel + Breeze + Sail), domain not implemented yet. Keep this file in sync
-> with reality as code lands.
+> Status: step 1 done (data model, factories, demo seeders). Next: policies, web controllers, views.
+> Keep this file in sync with reality as code lands.
 
 ## Stack
 
@@ -54,8 +54,13 @@ sail bin pint --test                        # check style (as CI does)
   `$touches = ['ticket']`, so `tickets.updated_at` is the "last activity" date.
   `tickets:close-stale {--days=7}` (scheduled daily) closes `resolved` tickets whose `updated_at`
   is older than N days.
+- **Visibility**: `Ticket::forUser($user)` is the single source of truth (client: own tickets; agent:
+  assigned to them or unassigned; admin: all). `Ticket::open()` means "still needs work"
+  (`open` + `in_progress`, see `TicketStatus::active()`), not just the `open` status.
+- **Deletion rules**: a category holding tickets cannot be deleted (`restrictOnDelete`); deleting an
+  agent unassigns their tickets (`nullOnDelete`); deleting a client removes their tickets.
 - **Internal comments** (`comments.is_internal`) are agent/admin notes and must never reach a client:
-  filter them in queries, views and API Resources.
+  filter them in queries, views and API Resources (`Comment::visibleTo($user)`).
 - **Attachments** live on the private `local` disk and are only served through an authorized
   download route. Never generate public URLs for them.
 
@@ -64,6 +69,10 @@ sail bin pint --test                        # check style (as CI does)
 - **Authorization**: one Policy per model; admins are granted access in `before()`. A client only ever
   sees their own tickets. Every access path (web, API, attachment download) must be scoped and
   authorized, so an ID in the URL is never enough (IDOR).
+- **Eloquent strict mode** is on outside production (`AppServiceProvider`): lazy loading (N+1),
+  silently discarded non-fillable attributes and missing attributes throw. Always eager load.
+- **Mass assignment**: `role`, `tickets.status/agent_id/client_id`, `comments.ticket_id/user_id` are
+  not fillable; controllers assign them explicitly after authorization.
 - **Validation**: Form Requests only; enum fields validated with `Rule::enum()`.
 - **Listing/filters**: shared Eloquent scopes (`forUser($user)`, `status()`, `priority()`, ...) used
   by both the web controllers and the API, so filtering rules exist in one place.
@@ -76,6 +85,8 @@ sail bin pint --test                        # check style (as CI does)
   (`.github/workflows/ci.yml`). Tests need the Sail containers running.
 - **Language**: code, identifiers and comments in English; UI text in French through `__()` and
   `lang/fr` (`APP_LOCALE=fr`, base translations from `laravel-lang/common`, app keys in `lang/fr.json`).
+  Enum labels come from `lang/{fr,en}/enums.php` via `->label()` (JSON keys are ambiguous:
+  "Open" is already the verb "Ouvrir").
 - Commits follow Conventional Commits.
 - Tests use MySQL, not SQLite as the plan suggested (production parity; the dashboard uses
   MySQL-specific functions such as `TIMESTAMPDIFF`).
