@@ -10,7 +10,7 @@ than feature count. Prefer framework features (Policies, Form Requests, API Reso
 scopes, factories) over custom abstractions. The full functional spec is `LARADESK_PLAN.md` (in French);
 this file records the decisions taken where the plan was ambiguous or superseded.
 
-> Status: step 1 done (data model, factories, demo seeders). Next: policies, web controllers, views.
+> Status: step 2 done (policies, web UI, attachments, comments, admin). Next: REST API (Sanctum).
 > Keep this file in sync with reality as code lands.
 
 ## Stack
@@ -66,14 +66,23 @@ sail bin pint --test                        # check style (as CI does)
 
 ## Conventions
 
-- **Authorization**: one Policy per model; admins are granted access in `before()`. A client only ever
+- **Authorization**: one Policy per model; admins are granted access in `before()` (except
+  `UserPolicy`: an admin cannot change their own role, and only clients may delete their account).
+  The Policy answers "may this user act on this ticket?"; the Form Request answers "with which value?"
+  (e.g. a client may only move their resolved ticket to `closed`). The `/admin` area is also guarded
+  by the `admin` Gate (`can:admin` middleware). A client only ever
   sees their own tickets. Every access path (web, API, attachment download) must be scoped and
   authorized, so an ID in the URL is never enough (IDOR).
 - **Eloquent strict mode** is on outside production (`AppServiceProvider`): lazy loading (N+1),
   silently discarded non-fillable attributes and missing attributes throw. Always eager load.
 - **Mass assignment**: `role`, `tickets.status/agent_id/client_id`, `comments.ticket_id/user_id` are
   not fillable; controllers assign them explicitly after authorization.
-- **Validation**: Form Requests only; enum fields validated with `Rule::enum()`.
+- **Validation**: Form Requests only (list filters too: `ListTicketsRequest::filters()` feeds
+  `Ticket::filter()`); enum fields validated with `Rule::enum()`.
+- **Controllers**: resource controllers for CRUD, single-action (`__invoke`) controllers for ticket
+  actions (status, priority, assignment), each with its own policy ability.
+- **Views**: UI strings via `__('English text')` + `lang/fr.json`. Badge colours live in the Blade
+  components (Tailwind only scans `resources/views`). `PageRenderingTest` renders every page per role.
 - **Listing/filters**: shared Eloquent scopes (`forUser($user)`, `status()`, `priority()`, ...) used
   by both the web controllers and the API, so filtering rules exist in one place.
 - **API**: versioned under `/api/v1`, `auth:sanctum`, always API Resources (never raw models),

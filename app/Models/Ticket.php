@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Http\UploadedFile;
 
 // status, agent_id and client_id are not fillable: they change through dedicated,
 // authorized actions, never through a generic form payload.
@@ -90,6 +91,24 @@ class Ticket extends Model
     }
 
     /**
+     * Stores an uploaded file on the private "local" disk and records it.
+     */
+    public function addAttachment(UploadedFile $file, User $uploader): Attachment
+    {
+        $attachment = $this->attachments()->make([
+            'original_name' => $file->getClientOriginalName(),
+            // Random file name: the client-provided name is never used on disk.
+            'path' => $file->store("tickets/{$this->getKey()}", 'local'),
+            'mime_type' => $file->getMimeType(),
+            'size' => $file->getSize(),
+        ]);
+        $attachment->user()->associate($uploader);
+        $attachment->save();
+
+        return $attachment;
+    }
+
+    /**
      * Tickets that still need work (open or in progress).
      *
      * @param  Builder<self>  $query
@@ -125,6 +144,33 @@ class Ticket extends Model
     protected function assignedTo(Builder $query, User|int $agent): void
     {
         $query->where('agent_id', $agent instanceof User ? $agent->getKey() : $agent);
+    }
+
+    /**
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function inCategory(Builder $query, Category|int $category): void
+    {
+        $query->where('category_id', $category instanceof Category ? $category->getKey() : $category);
+    }
+
+    /**
+     * Applies the list filters shared by the web and the API.
+     * Expects validated input (see ListTicketsRequest).
+     *
+     * @param  Builder<self>  $query
+     * @param  array{search?: ?string, status?: ?string, priority?: ?string, category?: ?int, agent?: ?int}  $filters
+     */
+    #[Scope]
+    protected function filter(Builder $query, array $filters): void
+    {
+        $query
+            ->search($filters['search'] ?? null)
+            ->when($filters['status'] ?? null, fn (Builder $query, string $status) => $query->status($status))
+            ->when($filters['priority'] ?? null, fn (Builder $query, string $priority) => $query->priority($priority))
+            ->when($filters['category'] ?? null, fn (Builder $query, int $category) => $query->inCategory($category))
+            ->when($filters['agent'] ?? null, fn (Builder $query, int $agent) => $query->assignedTo($agent));
     }
 
     /**

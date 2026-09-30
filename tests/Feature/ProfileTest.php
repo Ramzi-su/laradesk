@@ -79,6 +79,18 @@ class ProfileTest extends TestCase
         $this->assertNull($user->fresh());
     }
 
+    public function test_staff_cannot_delete_their_account(): void
+    {
+        $agent = User::factory()->agent()->create();
+
+        $this->actingAs($agent)
+            ->delete('/profile', ['password' => 'password'])
+            ->assertForbidden();
+
+        $this->assertNotNull($agent->fresh());
+        $this->actingAs($agent)->get('/profile')->assertDontSee(__('Delete Account'));
+    }
+
     public function test_correct_password_must_be_provided_to_delete_account(): void
     {
         $user = User::factory()->create();

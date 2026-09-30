@@ -60,6 +60,14 @@ class TicketSeeder extends Seeder
         ],
     ];
 
+    private const DESCRIPTIONS = [
+        "Bonjour,\n\nJe rencontre ce problème depuis hier et je ne trouve pas de solution dans l'aide en ligne. Pouvez-vous m'indiquer la marche à suivre ?\n\nMerci d'avance.",
+        "Bonjour,\n\nMalgré plusieurs essais, la situation ne s'améliore pas. J'ai vidé le cache de mon navigateur et redémarré mon ordinateur, sans effet.\n\nCordialement.",
+        "Bonjour,\n\nC'est la deuxième fois que cela arrive ce mois-ci. Pourriez-vous vérifier ce qui se passe de votre côté ?\n\nBonne journée.",
+        "Bonjour,\n\nJe vous contacte au sujet de ma dernière commande. Merci de revenir vers moi rapidement, c'est assez urgent.\n\nCordialement.",
+        "Bonjour,\n\nPouvez-vous m'aider ? Je joins toutes les informations utiles et reste disponible si vous avez besoin de précisions.\n\nMerci.",
+    ];
+
     private const COMMENTS = [
         'client' => [
             'Merci pour votre retour, le problème persiste de mon côté.',
@@ -124,6 +132,7 @@ class TicketSeeder extends Seeder
             ->for($category)
             ->create([
                 'title' => fake()->randomElement(self::TITLES[$category->slug]),
+                'description' => fake()->randomElement(self::DESCRIPTIONS),
                 'status' => $status,
                 'priority' => fake()->randomElement(TicketPriority::cases()),
                 'agent_id' => $agent?->getKey(),
