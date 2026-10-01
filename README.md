@@ -338,5 +338,5 @@ avec Pint puis lance la suite complète sur un service MySQL 8.4, à chaque push
 **Ramzi Moulahi**
 
 - GitHub : [@Ramzi-su](https://github.com/Ramzi-su)
-- LinkedIn : _à compléter_
-- Portfolio : _à compléter_
+- LinkedIn : [Ramzi Moulahi](https://www.linkedin.com/in/ramzi-moulahi-066b61303)
+- Portfolio :  [Ramzi-Portfolio](https://portfolio-opdu.vercel.app/)
