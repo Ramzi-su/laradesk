@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\CommentController;
@@ -29,6 +30,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::middleware('can:admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/dashboard', DashboardController::class)->name('dashboard');
         Route::resource('categories', CategoryController::class)->except('show');
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::patch('/users/{user}/role', [UserController::class, 'updateRole'])->name('users.role');

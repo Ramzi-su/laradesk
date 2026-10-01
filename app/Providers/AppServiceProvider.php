@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 
@@ -29,6 +30,9 @@ class AppServiceProvider extends ServiceProvider
         // Outside production, fail loudly on N+1 lazy loading, on attributes silently
         // discarded by mass-assignment protection and on attributes that were not loaded.
         Model::shouldBeStrict(! $this->app->isProduction());
+
+        // Number::format() / fileSize() follow the app locale ("39,2" in French, not "39.2").
+        Number::useLocale($this->app->getLocale());
 
         // Guards the whole /admin area (route middleware "can:admin").
         Gate::define('admin', fn (User $user): bool => $user->isAdmin());

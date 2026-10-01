@@ -10,7 +10,7 @@ than feature count. Prefer framework features (Policies, Form Requests, API Reso
 scopes, factories) over custom abstractions. The full functional spec is `LARADESK_PLAN.md` (in French);
 this file records the decisions taken where the plan was ambiguous or superseded.
 
-> Status: step 4 done (queued notifications, `tickets:close-stale`, scheduler). Next: admin dashboard + Chart.js.
+> Status: step 5 done (admin dashboard + Chart.js). Next: test completeness, Sail, GitHub Actions.
 > Keep this file in sync with reality as code lands.
 
 ## Stack
@@ -96,6 +96,11 @@ sail bin pint --test                        # check style (as CI does)
   notify; nobody is notified of their own action (`Auth::id()`), and internal notes never go to the
   client. Seeders create comments inside `Comment::withoutEvents()` to avoid queuing demo e-mails.
   Bulk query-builder updates bypass observers: use them only when no notification is wanted.
+- **Dashboard** (`/admin/dashboard`): figures come from `App\Queries\TicketStatistics`, one aggregate
+  SQL query per figure (never load tickets into memory; a test asserts the query count is constant).
+  Chart.js is a separate Vite entry (`resources/js/dashboard.js`) pushed only on that page via
+  `@push('scripts')`; chart data goes through an escaped `data-chart` attribute, not an inline script.
+  `Number` uses the app locale (`AppServiceProvider`). The desktop navigation starts at `lg`.
 - **Scheduler** (`routes/console.php`): `tickets:close-stale` and `sanctum:prune-expired`, daily.
   The command saves tickets one by one (`lazyById()`) so observers run.
 - **Tests**: feature tests for every endpoint and policy rule, using factory states and
