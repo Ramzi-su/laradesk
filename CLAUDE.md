@@ -10,7 +10,7 @@ than feature count. Prefer framework features (Policies, Form Requests, API Reso
 scopes, factories) over custom abstractions. The full functional spec is `LARADESK_PLAN.md` (in French);
 this file records the decisions taken where the plan was ambiguous or superseded.
 
-> Status: step 6 done (test completeness, Sail + Mailpit, CI). Next: README, final security/quality review.
+> Status: all plan steps done (0–7). README with screenshots in `docs/screenshots`. Not pushed yet.
 > Keep this file in sync with reality as code lands.
 
 ## Stack
