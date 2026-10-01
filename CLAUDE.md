@@ -10,7 +10,7 @@ than feature count. Prefer framework features (Policies, Form Requests, API Reso
 scopes, factories) over custom abstractions. The full functional spec is `LARADESK_PLAN.md` (in French);
 this file records the decisions taken where the plan was ambiguous or superseded.
 
-> Status: step 2 done (policies, web UI, attachments, comments, admin). Next: REST API (Sanctum).
+> Status: step 3 done (REST API with Sanctum). Next: queued notifications, `tickets:close-stale`, scheduler.
 > Keep this file in sync with reality as code lands.
 
 ## Stack
@@ -86,7 +86,11 @@ sail bin pint --test                        # check style (as CI does)
 - **Listing/filters**: shared Eloquent scopes (`forUser($user)`, `status()`, `priority()`, ...) used
   by both the web controllers and the API, so filtering rules exist in one place.
 - **API**: versioned under `/api/v1`, `auth:sanctum`, always API Resources (never raw models),
-  always paginated.
+  always paginated. API controllers live in `App\Http\Controllers\Api\V1` and reuse the web Form
+  Requests and Policies. Shared write logic goes in `App\Actions` (e.g. `CreateTicket`). Rate limiters
+  `api` (60/min per user) and `login` (5/min per email+IP, 20/min per IP) are in `AppServiceProvider`.
+  Tokens expire after `SANCTUM_TOKEN_EXPIRATION` minutes (7 days). `api/*` errors are always JSON;
+  404s never reveal model class names (`bootstrap/app.php`).
 - **Notifications** implement `ShouldQueue`.
 - **Tests**: feature tests for every endpoint and policy rule, using factory states and
   `Notification::fake()`, `Storage::fake()`, `Queue::fake()`. Tests run on MySQL, like production:

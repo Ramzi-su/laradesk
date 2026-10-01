@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\CreateTicket;
 use App\Enums\TicketPriority;
 use App\Enums\TicketStatus;
 use App\Enums\UserRole;
@@ -12,7 +13,6 @@ use App\Models\Category;
 use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
@@ -48,21 +48,13 @@ class TicketController extends Controller
         ]);
     }
 
-    public function store(StoreTicketRequest $request): RedirectResponse
+    public function store(StoreTicketRequest $request, CreateTicket $createTicket): RedirectResponse
     {
-        $user = $request->user();
-
-        $ticket = DB::transaction(function () use ($request, $user) {
-            $ticket = new Ticket($request->safe()->except('attachments'));
-            $ticket->client()->associate($user);
-            $ticket->save();
-
-            foreach ($request->file('attachments', []) as $file) {
-                $ticket->addAttachment($file, $user);
-            }
-
-            return $ticket;
-        });
+        $ticket = $createTicket->handle(
+            $request->user(),
+            $request->safe()->except('attachments'),
+            $request->file('attachments', []),
+        );
 
         return to_route('tickets.show', $ticket)
             ->with('success', __('Ticket :reference created.', ['reference' => $ticket->reference]));
