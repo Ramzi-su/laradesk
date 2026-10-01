@@ -70,6 +70,17 @@ class TicketShowAndUpdateTest extends TestCase
         $this->assertSame('New title', $ticket->fresh()->title);
     }
 
+    public function test_update_validation_rejects_invalid_data(): void
+    {
+        $ticket = Ticket::factory()->create(['title' => 'Original']);
+
+        $this->actingAs($ticket->client)
+            ->put(route('tickets.update', $ticket), ['title' => str_repeat('a', 256), 'description' => ''])
+            ->assertSessionHasErrors(['title', 'description']);
+
+        $this->assertSame('Original', $ticket->fresh()->title);
+    }
+
     public function test_client_cannot_edit_a_ticket_in_progress(): void
     {
         $ticket = Ticket::factory()->inProgress()->create();

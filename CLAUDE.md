@@ -10,15 +10,18 @@ than feature count. Prefer framework features (Policies, Form Requests, API Reso
 scopes, factories) over custom abstractions. The full functional spec is `LARADESK_PLAN.md` (in French);
 this file records the decisions taken where the plan was ambiguous or superseded.
 
-> Status: step 5 done (admin dashboard + Chart.js). Next: test completeness, Sail, GitHub Actions.
+> Status: step 6 done (test completeness, Sail + Mailpit, CI). Next: README, final security/quality review.
 > Keep this file in sync with reality as code lands.
 
 ## Stack
 
 - Laravel 13, PHP 8.5, MySQL 8.4, Blade + Tailwind via Laravel Breeze, Vite, Chart.js (npm)
 - Sanctum (API tokens), PHPUnit, Laravel Pint
-- Laravel Sail (Docker) for local dev, GitHub Actions for CI
-- Queue driver `database`; mail driver `log` locally
+- Laravel Sail (Docker: app, MySQL 8.4, Mailpit) for local dev, GitHub Actions for CI
+- **Never run `sail:install` / `sail:add` without backing up `.env` first**: they rewrite it
+  (mail settings, and `DB_PASSWORD=password` unconditionally).
+- Queue driver `database`; mail driver `log` locally (`.env.example`). With Sail, Mailpit catches
+  e-mails at http://localhost:8025 if `MAIL_MAILER=smtp`, `MAIL_HOST=mailpit`, `MAIL_PORT=1025`.
 
 ## Commands
 

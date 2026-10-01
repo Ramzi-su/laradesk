@@ -8,6 +8,11 @@ on:
 permissions:
   contents: read
 
+# A new push on the same branch cancels the run that became obsolete.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint:
     name: Code style (Pint)
@@ -20,7 +25,8 @@ jobs:
           php-version: '8.5'
           coverage: none
 
-      - run: composer install --no-interaction --prefer-dist --no-progress
+      # Installs dependencies with a cache keyed on composer.lock.
+      - uses: ramsey/composer-install@v3
 
       - run: vendor/bin/pint --test
 
@@ -57,7 +63,8 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.5'
-          extensions: pdo_mysql
+          # intl: Number::useLocale() (French number formatting); pdo_mysql: database.
+          extensions: intl, pdo_mysql
           coverage: none
 
       - uses: actions/setup-node@v5
@@ -65,7 +72,7 @@ jobs:
           node-version: 24
           cache: npm
 
-      - run: composer install --no-interaction --prefer-dist --no-progress
+      - uses: ramsey/composer-install@v3
 
       # Blade views call @vite(), so feature tests need the build manifest.
       - run: npm ci && npm run build
