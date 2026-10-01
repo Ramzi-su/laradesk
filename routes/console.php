@@ -1,8 +1,14 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+// Run locally with "php artisan schedule:work"; in production, a cron entry
+// calls "php artisan schedule:run" every minute.
+
+Schedule::command('tickets:close-stale')
+    ->daily()
+    ->withoutOverlapping();
+
+// Expired Sanctum tokens are rejected but stay in the table until pruned.
+Schedule::command('sanctum:prune-expired --hours=24')
+    ->daily();

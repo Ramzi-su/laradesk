@@ -163,8 +163,9 @@ class TicketSeeder extends Seeder
             return $lastCommentAt;
         }
 
-        // Comments are backdated, so they must not touch the ticket's updated_at.
-        Comment::withoutTouching(function () use ($ticket, $client, $agent, $end, &$date, &$lastCommentAt) {
+        // Comments are backdated, so they must not touch the ticket's updated_at,
+        // and demo data must not queue notification e-mails (CommentObserver).
+        Comment::withoutEvents(fn () => Comment::withoutTouching(function () use ($ticket, $client, $agent, $end, &$date, &$lastCommentAt) {
             foreach (range(1, random_int(1, 4)) as $n) {
                 $date = $date->copy()->addMinutes(random_int(30, 600));
                 if ($date->greaterThan($end)) {
@@ -187,7 +188,7 @@ class TicketSeeder extends Seeder
 
                 $lastCommentAt = $date;
             }
-        });
+        }));
 
         return $lastCommentAt;
     }

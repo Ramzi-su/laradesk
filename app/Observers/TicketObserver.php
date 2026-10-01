@@ -4,6 +4,9 @@ namespace App\Observers;
 
 use App\Enums\TicketStatus;
 use App\Models\Ticket;
+use App\Notifications\TicketAssigned;
+use App\Notifications\TicketStatusChanged;
+use Illuminate\Support\Facades\Auth;
 
 class TicketObserver
 {
@@ -30,6 +33,24 @@ class TicketObserver
                 'closed_at' => $ticket->closed_at ?? now(),
             ]),
         };
+    }
+
+    /**
+     * Notifies the people concerned, whatever triggered the change (web, API or
+     * scheduled command). Nobody is notified of their own action.
+     */
+    public function updated(Ticket $ticket): void
+    {
+        $actorId = Auth::id();
+
+        if ($ticket->wasChanged('status') && $ticket->client_id !== $actorId) {
+            // In "updated", the original attributes still hold the previous (cast) value.
+            $ticket->client->notify(new TicketStatusChanged($ticket, $ticket->getOriginal('status')));
+        }
+
+        if ($ticket->wasChanged('agent_id') && $ticket->agent_id !== null && $ticket->agent_id !== $actorId) {
+            $ticket->agent->notify(new TicketAssigned($ticket));
+        }
     }
 
     /**

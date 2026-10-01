@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Observers\CommentObserver;
 use Database\Factories\CommentFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\Touches;
 use Illuminate\Database\Eloquent\Builder;
@@ -15,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable(['body', 'is_internal'])]
 // A new comment bumps tickets.updated_at: it is the ticket's "last activity" date.
 #[Touches('ticket')]
+#[ObservedBy(CommentObserver::class)]
 class Comment extends Model
 {
     /** @use HasFactory<CommentFactory> */
