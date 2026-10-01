@@ -73,7 +73,7 @@ class TicketSeeder extends Seeder
             'Merci pour votre retour, le problème persiste de mon côté.',
             'Voici des précisions : cela arrive surtout le matin.',
             'Avez-vous des nouvelles concernant ma demande ?',
-            'Parfait, tout fonctionne maintenant. Merci !',
+            'J’ai essayé votre solution, je vous tiens au courant.',
         ],
         'agent' => [
             'Bonjour, nous avons bien reçu votre demande et nous l’analysons.',
@@ -166,21 +166,26 @@ class TicketSeeder extends Seeder
         // Comments are backdated, so they must not touch the ticket's updated_at,
         // and demo data must not queue notification e-mails (CommentObserver).
         Comment::withoutEvents(fn () => Comment::withoutTouching(function () use ($ticket, $client, $agent, $end, &$date, &$lastCommentAt) {
-            foreach (range(1, random_int(1, 4)) as $n) {
+            // A plausible conversation: the agent opens with a public answer, then client and
+            // agent alternate; later agent turns are sometimes internal notes. No sentence repeats.
+            $bodies = array_map(fn (array $pool) => collect($pool)->shuffle()->all(), self::COMMENTS);
+
+            foreach (range(0, random_int(0, 3)) as $turn) {
                 $date = $date->copy()->addMinutes(random_int(30, 600));
                 if ($date->greaterThan($end)) {
                     break;
                 }
 
-                $isInternal = fake()->boolean(20);
-                $author = $isInternal || $n % 2 === 1 ? $agent : $client;
-                $pool = $isInternal ? 'internal' : ($author->is($agent) ? 'agent' : 'client');
+                $byAgent = $turn % 2 === 0;
+                $isInternal = $byAgent && $turn > 0 && fake()->boolean(40);
+                $author = $byAgent ? $agent : $client;
+                $pool = $isInternal ? 'internal' : ($byAgent ? 'agent' : 'client');
 
                 Comment::factory()
                     ->for($ticket)
                     ->for($author)
                     ->create([
-                        'body' => fake()->randomElement(self::COMMENTS[$pool]),
+                        'body' => array_shift($bodies[$pool]),
                         'is_internal' => $isInternal,
                         'created_at' => $date,
                         'updated_at' => $date,

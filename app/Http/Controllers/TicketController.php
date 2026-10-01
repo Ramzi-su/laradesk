@@ -13,6 +13,7 @@ use App\Models\Category;
 use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
@@ -60,11 +61,11 @@ class TicketController extends Controller
             ->with('success', __('Ticket :reference created.', ['reference' => $ticket->reference]));
     }
 
-    public function show(Ticket $ticket): View
+    public function show(Request $request, Ticket $ticket): View
     {
         Gate::authorize('view', $ticket);
 
-        $user = request()->user();
+        $user = $request->user();
 
         $ticket->load([
             'category',
