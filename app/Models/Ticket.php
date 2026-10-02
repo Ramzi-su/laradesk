@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 
 // status, agent_id and client_id are not fillable: they change through dedicated,
 // authorized actions, never through a generic form payload.
@@ -88,6 +89,35 @@ class Ticket extends Model
     public function attachments(): HasMany
     {
         return $this->hasMany(Attachment::class);
+    }
+
+    /**
+     * Assigns the ticket to the agent only if nobody took it in the meantime.
+     *
+     * The authorization check ("still unassigned?") and the write happen at different
+     * moments, so two agents could both pass it. Locking the row (SELECT ... FOR UPDATE)
+     * serializes concurrent claims: the second one waits, then sees the first agent and
+     * gives up. The first claim wins instead of the last one.
+     */
+    public function claimFor(User $agent): bool
+    {
+        $claimed = DB::transaction(function () use ($agent): bool {
+            $locked = static::query()->lockForUpdate()->findOrFail($this->getKey());
+
+            if ($locked->agent_id !== null) {
+                return false;
+            }
+
+            // Saved through Eloquent (not a raw UPDATE) so TicketObserver still runs.
+            $locked->agent()->associate($agent);
+            $locked->save();
+
+            return true;
+        });
+
+        $this->refresh();
+
+        return $claimed;
     }
 
     /**
