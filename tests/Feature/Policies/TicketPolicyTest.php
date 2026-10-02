@@ -8,7 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * The role matrix from LARADESK_PLAN.md (section 5), rule by rule.
+ * The role matrix documented in the README ("Fonctionnalités"), rule by rule.
  */
 class TicketPolicyTest extends TestCase
 {
