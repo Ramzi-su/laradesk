@@ -6,11 +6,9 @@
     </x-slot>
 
     <div class="py-8">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             {{-- enctype is required for file uploads. --}}
-            <form method="POST" action="{{ route('tickets.store') }}" enctype="multipart/form-data" class="bg-white shadow-sm sm:rounded-lg p-6 space-y-6">
-                @csrf
-
+            <form method="POST" action="{{ route('tickets.store') }}" enctype="multipart/form-data" class="bg-white border border-gray-200 rounded-xl p-6 space-y-6">
                 <div>
                     <x-input-label for="title" :value="__('Title')" />
                     <x-text-input id="title" name="title" class="mt-1 block w-full" :value="old('title')" required maxlength="255" autofocus />
@@ -66,6 +64,8 @@
                     <a href="{{ route('tickets.index') }}" class="text-sm text-gray-600 hover:text-gray-900">{{ __('Cancel') }}</a>
                     <x-primary-button>{{ __('Create ticket') }}</x-primary-button>
                 </div>
+
+                @csrf
             </form>
         </div>
     </div>

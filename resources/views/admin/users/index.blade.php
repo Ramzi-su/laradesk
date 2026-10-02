@@ -17,10 +17,10 @@
     </x-slot>
 
     <div class="py-8">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="bg-white shadow-sm sm:rounded-lg overflow-x-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+            <div class="bg-white border border-gray-200 rounded-xl overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 text-sm">
-                    <thead class="bg-gray-50 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <thead class="bg-gray-50 text-left text-xs font-bold text-gray-600">
                         <tr>
                             <th class="px-4 py-3">{{ __('Name') }}</th>
                             <th class="px-4 py-3 hidden md:table-cell">{{ __('Email') }}</th>

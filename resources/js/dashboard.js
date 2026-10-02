@@ -13,11 +13,14 @@ if (canvas) {
             datasets: [{
                 label,
                 data,
-                backgroundColor: 'rgba(79, 70, 229, 0.7)',
+                backgroundColor: '#0E5E6F', // brand-700 (tailwind.config.js)
+                hoverBackgroundColor: '#0A4652',
                 borderRadius: 4,
             }],
         },
         options: {
+            // Respect the "reduce motion" system setting (vestibular disorders).
+            animation: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? false : undefined,
             responsive: true,
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },

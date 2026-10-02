@@ -1,3 +1,46 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+ * Ticket stub: the perforated edge between a ticket and its stub, with a
+ * half-circle notch at each end, cut in the page background colour.
+ */
+@layer components {
+    .ticket-stub {
+        @apply relative border-t-2 border-dashed border-gray-300;
+    }
+
+    .ticket-stub::before,
+    .ticket-stub::after {
+        content: '';
+        @apply absolute -top-[11px] h-5 w-5 rounded-full bg-paper;
+    }
+
+    .ticket-stub::before {
+        @apply -left-2.5;
+    }
+
+    .ticket-stub::after {
+        @apply -right-2.5;
+    }
+
+    @media (min-width: 640px) {
+        .ticket-stub {
+            @apply border-l-2 border-t-0;
+        }
+
+        .ticket-stub::before,
+        .ticket-stub::after {
+            @apply -left-[11px] right-auto;
+        }
+
+        .ticket-stub::before {
+            @apply -top-2.5;
+        }
+
+        .ticket-stub::after {
+            @apply -bottom-2.5 top-auto;
+        }
+    }
+}

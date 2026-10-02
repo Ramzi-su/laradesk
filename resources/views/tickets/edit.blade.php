@@ -8,11 +8,8 @@
     </x-slot>
 
     <div class="py-8">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
-            <form method="POST" action="{{ route('tickets.update', $ticket) }}" class="bg-white shadow-sm sm:rounded-lg p-6 space-y-6">
-                @csrf
-                @method('PUT')
-
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <form method="POST" action="{{ route('tickets.update', $ticket) }}" class="bg-white border border-gray-200 rounded-xl p-6 space-y-6">
                 <div>
                     <x-input-label for="title" :value="__('Title')" />
                     <x-text-input id="title" name="title" class="mt-1 block w-full" :value="old('title', $ticket->title)" required maxlength="255" autofocus />
@@ -29,6 +26,9 @@
                     <a href="{{ route('tickets.show', $ticket) }}" class="text-sm text-gray-600 hover:text-gray-900">{{ __('Cancel') }}</a>
                     <x-primary-button>{{ __('Save') }}</x-primary-button>
                 </div>
+
+                @csrf
+                @method('PUT')
             </form>
         </div>
     </div>

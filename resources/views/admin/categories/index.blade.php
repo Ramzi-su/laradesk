@@ -4,18 +4,15 @@
     <x-slot name="header">
         <div class="flex items-center justify-between gap-4">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Categories') }}</h2>
-            <a href="{{ route('admin.categories.create') }}"
-               class="inline-flex items-center px-4 py-2 bg-gray-800 rounded-md text-xs font-semibold text-white uppercase tracking-widest hover:bg-gray-700">
-                {{ __('New category') }}
-            </a>
+            <x-primary-link href="{{ route('admin.categories.create') }}">{{ __('New category') }}</x-primary-link>
         </div>
     </x-slot>
 
     <div class="py-8">
-        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="bg-white shadow-sm sm:rounded-lg overflow-x-auto">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+            <div class="bg-white border border-gray-200 rounded-xl overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 text-sm">
-                    <thead class="bg-gray-50 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <thead class="bg-gray-50 text-left text-xs font-bold text-gray-600">
                         <tr>
                             <th class="px-4 py-3">{{ __('Name') }}</th>
                             <th class="px-4 py-3 hidden md:table-cell">{{ __('Description') }}</th>
@@ -31,7 +28,7 @@
                                 <td class="px-4 py-3 text-right">{{ $category->tickets_count }}</td>
                                 <td class="px-4 py-3">
                                     <div class="flex justify-end gap-4">
-                                        <a href="{{ route('admin.categories.edit', $category) }}" class="text-indigo-700 hover:underline">{{ __('Edit') }}</a>
+                                        <a href="{{ route('admin.categories.edit', $category) }}" class="text-brand-700 hover:underline">{{ __('Edit') }}</a>
                                         <form method="POST" action="{{ route('admin.categories.destroy', $category) }}"
                                               onsubmit="return confirm(@js(__('Delete this category?')))">
                                             @csrf

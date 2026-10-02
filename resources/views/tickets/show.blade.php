@@ -1,21 +1,30 @@
 <x-app-layout>
     <x-slot name="title">{{ $ticket->reference }}</x-slot>
 
-    <x-slot name="header">
-        <div class="flex flex-wrap items-center justify-between gap-4">
-            <div>
-                <p class="font-mono text-xs text-gray-500">{{ $ticket->reference }}</p>
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ $ticket->title }}</h2>
-            </div>
-            <div class="flex items-center gap-2">
-                <x-status-badge :status="$ticket->status" />
-                <x-priority-badge :priority="$ticket->priority" />
-            </div>
-        </div>
-    </x-slot>
-
     <div class="py-8">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
+            {{-- The ticket itself, drawn as a paper ticket with a detachable stub. --}}
+            {{-- overflow-hidden clips the outer half of the notches, leaving a clean cut. --}}
+            <section class="lg:col-span-3 flex flex-col sm:flex-row overflow-hidden bg-white border border-gray-200 rounded-xl">
+                <div class="flex-1 p-6">
+                    <h1 class="text-2xl font-bold leading-tight text-ink">{{ $ticket->title }}</h1>
+                    <p class="mt-2 text-sm text-gray-600">
+                        {{ __(':category, opened :date by :client', [
+                            'category' => $ticket->category->name,
+                            'date' => $ticket->created_at->isoFormat('LL'),
+                            'client' => $ticket->client->name,
+                        ]) }}
+                    </p>
+                </div>
+                <div class="ticket-stub flex flex-row items-center justify-between gap-3 p-6 sm:w-60 sm:flex-col sm:items-start sm:justify-center">
+                    <p class="text-2xl font-bold tracking-wide tabular-nums text-brand-800">{{ $ticket->reference }}</p>
+                    <div class="flex flex-wrap gap-2">
+                        <x-status-badge :status="$ticket->status" />
+                        <x-priority-badge :priority="$ticket->priority" />
+                    </div>
+                </div>
+            </section>
+
             <div class="space-y-6 lg:col-span-2">
                 <x-card :title="__('Description')">
                     {{-- whitespace-pre-line keeps line breaks while {{ }} escapes the content (no XSS). --}}
@@ -23,7 +32,7 @@
 
                     @can('update', $ticket)
                         <div class="mt-4 text-right">
-                            <a href="{{ route('tickets.edit', $ticket) }}" class="text-sm text-indigo-700 hover:underline">{{ __('Edit') }}</a>
+                            <a href="{{ route('tickets.edit', $ticket) }}" class="text-sm text-brand-700 hover:underline">{{ __('Edit') }}</a>
                         </div>
                     @endcan
                 </x-card>
@@ -33,7 +42,7 @@
                         <ul class="divide-y divide-gray-100">
                             @foreach ($ticket->attachments as $attachment)
                                 <li class="flex items-center justify-between gap-4 py-2 text-sm">
-                                    <a href="{{ route('attachments.show', $attachment) }}" class="font-medium text-indigo-700 hover:underline break-all">
+                                    <a href="{{ route('attachments.show', $attachment) }}" class="font-medium text-brand-700 hover:underline break-all">
                                         {{ $attachment->original_name }}
                                     </a>
                                     <span class="whitespace-nowrap text-gray-500">
@@ -70,7 +79,6 @@
 
                     @can('comment', $ticket)
                         <form method="POST" action="{{ route('tickets.comments.store', $ticket) }}" class="mt-6 space-y-3">
-                            @csrf
                             <x-input-label for="body" :value="__('Add a comment')" />
                             <x-textarea-input id="body" name="body" rows="4" class="block w-full" required>{{ old('body') }}</x-textarea-input>
                             <x-input-error :messages="$errors->get('body')" />
@@ -86,6 +94,8 @@
                                 @endcan
                                 <x-primary-button>{{ __('Send') }}</x-primary-button>
                             </div>
+
+                            @csrf
                         </form>
                     @endcan
                 </x-card>
@@ -94,8 +104,6 @@
             <aside class="space-y-6">
                 <x-card :title="__('Details')">
                     <dl class="space-y-3 text-sm">
-                        <div class="flex justify-between gap-4"><dt class="text-gray-500">{{ __('Category') }}</dt><dd class="text-right">{{ $ticket->category->name }}</dd></div>
-                        <div class="flex justify-between gap-4"><dt class="text-gray-500">{{ __('Client') }}</dt><dd class="text-right">{{ $ticket->client->name }}</dd></div>
                         <div class="flex justify-between gap-4"><dt class="text-gray-500">{{ __('Agent') }}</dt><dd class="text-right">{{ $ticket->agent?->name ?? __('Unassigned') }}</dd></div>
                         <div class="flex justify-between gap-4"><dt class="text-gray-500">{{ __('Created') }}</dt><dd class="text-right">{{ $ticket->created_at->isoFormat('LLL') }}</dd></div>
                         @if ($ticket->resolved_at)

@@ -20,7 +20,7 @@
     @endphp
 
     <div class="py-8">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             <div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
                 <x-stat-card :label="__('Total tickets')" :value="$total" />
                 @foreach ($statuses as $status)
